@@ -1,4 +1,9 @@
 def intersection(interval1: list, interval2: list) -> list:
+    '''
+    if intervals dont intersect return none
+    else process one of four cases of intersection
+    return intervals of intersection
+    '''
     start1, end1 = interval1
     start2, end2 = interval2
     if start1 > end2 or end1 < start2:
@@ -10,28 +15,24 @@ def intersection(interval1: list, interval2: list) -> list:
                 [     ]
             [     ]
             '''
-            print('1')
             return [start1, end2]
         elif start1 < start2 and end1 > end2:
             '''
             [     ]
               []
             '''
-            print('4')
             return [start2, end2]
         elif start1 < start2 and end1 < end2:
             '''
             [     ]
                 [     ]
             '''
-            print('2')
             return [start2, end1]
         elif start1 > start2 and end1 < end2:
             '''
               []
             [     ]
             '''
-            print('3')
             return [start1, end1]
         else:
             raise Exception(f'intersection error: {interval1}, {interval2}')
@@ -40,12 +41,57 @@ def intersection(interval1: list, interval2: list) -> list:
 def appearance(intervals):
     pupil_lesson_intersections = []
     pupil_offset = 0
-    lesson_offset = 0 
+    lesson_offset = 0
+    a = 0
+    # a and b is pointers to move through list in while cycle above
+    # 'offset' variables using for the same purpose but for the main algorithm
+    while a < len(intervals['pupil']):
+        '''
+        there is start of the one pupil interval
+        may locate in the another pupil interval in the test case 1.
+        idk how its physically possible but 
+        i have to process this case too.
+        i tried to do it like that but unfortunately
+        it is not passing the test case 1 although seems like true method.
+        '''
+        b = 1
+        while b+2 < len(intervals['pupil']):
+            if intervals['pupil'][b+1] < intervals['pupil'][b]:
+                intervals['pupil'].pop(b+1)
+                intervals['pupil'].pop(b)
+            b+=2
+        a += 2
+    
+    a = 0 
+    while a < len(intervals['lesson']):
+        b = 1
+        while b+2 < len(intervals['lesson']):
+            if intervals['lesson'][b+1] < intervals['lesson'][b]:
+                intervals['lesson'].pop(b+1)
+                intervals['lesson'].pop(b)
+            b+=2
+        a += 2
+        
+    a = 0
+    while a < len(intervals['tutor']):
+        b = 1
+        while b+2 < len(intervals['tutor']):
+            if intervals['tutor'][b+1] < intervals['tutor'][b]:
+                intervals['tutor'].pop(b+1)
+                intervals['tutor'].pop(b)
+            b+=2
+        a += 2
+
     while lesson_offset+1 < len(intervals['lesson']) and pupil_offset+1 < len(intervals['pupil']):
+        '''
+        here i take two first intervals from 'lesson' and 'pupil' 
+        then compare it. After that i
+        search for one of these intervals that ends last and take it to
+        the next comparing
+        '''
         interval1 = intervals['lesson'][lesson_offset:lesson_offset+2]
         interval2 = intervals['pupil'][pupil_offset:pupil_offset+2]
         result_interval = intersection(interval1, interval2)
-        print(interval1, interval2, result_interval, sep=' : ')
         if result_interval is not None:
             pupil_lesson_intersections += result_interval
         if interval1[1] > interval2[1]:
@@ -60,16 +106,18 @@ def appearance(intervals):
             .......]
             '''
             lesson_offset += 2
-    print(pupil_lesson_intersections)
     
     pupil_tutor_intersections = []
     pupil_lesson_offset = 0
     tutor_offset = 0 
     while pupil_lesson_offset+1 < len(pupil_lesson_intersections) and tutor_offset+1 < len(intervals['tutor']):
+        '''
+        here i do same thing like in previous while but now i compare
+        list of intervals from the previous step and 'tutor' intrevals
+        '''
         interval1 = pupil_lesson_intersections[pupil_lesson_offset:pupil_lesson_offset+2]
         interval2 = intervals['tutor'][tutor_offset:tutor_offset+2]
         result_interval = intersection(interval1, interval2)
-        print(interval1, interval2, result_interval, sep=' : ')
         if result_interval is not None:
             pupil_tutor_intersections.append(result_interval)
         if interval1[1] > interval2[1]:
@@ -84,7 +132,6 @@ def appearance(intervals):
             .......]
             '''
             pupil_lesson_offset += 2
-    print(pupil_tutor_intersections)
     return sum([i[1] - i[0] for i in pupil_tutor_intersections])
     
 tests = [
@@ -112,4 +159,3 @@ if __name__ == '__main__':
     for i, test in enumerate(tests):
         test_answer = appearance(test['data'])
         assert test_answer == test['answer'], f'Error on test case {i}, got {test_answer}, expected {test["answer"]}'
-
